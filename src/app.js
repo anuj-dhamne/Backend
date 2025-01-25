@@ -7,10 +7,16 @@ app.use(cors({
     credentials:true
 }))
 
+// app.use() --> mostly used for configuration and middleware
 app.use(express.json({limit :"20kb"}))
 app.use(express.urlencoded({extended:true,limit:"16kb"}))
 app.use(express.static("public"))
 app.use(cookieParser())
-// app.use() --> mostly used for configuration and middleware
-app.use(express.json())
+
+
+
+// routes import 
+import userRouter from "./routes/user.routes.js"
+
+app.use("/api/v1/users",userRouter);
 export{app}
