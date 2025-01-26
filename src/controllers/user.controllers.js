@@ -5,10 +5,12 @@ import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const registerUser=asyncHandler(async (req,res)=>{
-  // 1.get user details from frontend 
+  console.log("Request Files : ",req.files);
+  console.log("Request body : ",req.body);
 
+  // 1.get user details from frontend 
       const {fullname,email,username,password}=req.body;
-      console.log(`Fullname : ${fullname} email :${email}`);
+      // console.log(`Fullname : ${fullname} email :${email}`);
 
   // 2.validation - not empty
 
@@ -24,7 +26,7 @@ const registerUser=asyncHandler(async (req,res)=>{
         }
 
   // 3.check if user already exists :username,email
-        const existedUser=username.findOne({
+        const existedUser=await User.findOne({
           $or:[{username},{email}]
         })
 
@@ -33,16 +35,26 @@ const registerUser=asyncHandler(async (req,res)=>{
         }
   // 4.check for images ,avator
 
-        const avatorLocalPath=req.files?.avator[0]?.path;
-        const coverImageLocalPath=req.files?.coverImage[0]?.path;
+        const avatorLocalPath=req.files?.avator?.[0]?.path;
+        // const coverImageLocalPath=req.files?.coverImage[0]?.path;
 
-        if(!avatorLocalPath)return new ApiError(400,"Avator file is required");
+        let coverImageLocalPath;
+        if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0)
+       {
+          coverImageLocalPath = req.files.coverImage[0].path
+      }
+
+      
+        if(!avatorLocalPath)
+          {throw new ApiError(400,"Avator file is required");}
 
   // 5.upload on cloudinary
       const avator=await  uploadOnCloudinary(avatorLocalPath);
-     const coverImage= await  uploadOnCloudinary(coverImageLocalPath);
+     const coverImage=  coverImageLocalPath
+     ? await uploadOnCloudinary(coverImageLocalPath)
+     : null;
      
-     if(!avator)return new ApiError(400,"Avator file is required");
+     if(!avator){throw new ApiError(400,"Avator file is required");}
      
         
   // 6.create user object - crate entry in db
@@ -52,7 +64,7 @@ const registerUser=asyncHandler(async (req,res)=>{
     coverImage:coverImage?.url || "",
     email,password,
     username:username.toLowerCase(),
-  })
+  });
 
 
   // 7.remove password and refresh token field from response
