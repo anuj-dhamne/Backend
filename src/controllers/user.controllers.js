@@ -272,7 +272,7 @@ const updateUserAvator=asyncHandler(async (req,res)=>{
   const user=await User.findByIdAndUpdate(
     req.user?._id,
     {
-      $set:{avator:avator.url;}
+      $set:{avator:avator.url}
     },
     {
       new:true,
@@ -297,7 +297,7 @@ const updateUserCoverImage=asyncHandler(async (req,res)=>{
   const user=await User.findByIdAndUpdate(
     req.user?._id,
     {
-      $set:{coverImage:coverImage.url;}
+      $set:{coverImage:coverImage.url}
     },
     {
       new:true,
